@@ -4,6 +4,7 @@ const port = 3000;
 
 const users = ['Manuel', 'Leon', 'Anke', 'Zied'];
 
+// Aufgabe 2 - 404 als Error zurückgeben
 app.get('/api/users/:name', (request, response) => {
   const isNameKnow = users.includes(request.params.name);
   if (isNameKnow) {
