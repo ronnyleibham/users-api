@@ -1,21 +1,28 @@
 import express from 'express';
-
 const app = express();
 const port = 3000;
 
-app.get('/api/users/:username', (_request, response) => {
-  response.send(_request.params.username);
+const users = ['Manuel', 'Leon', 'Anke', 'Zied'];
+
+app.get('/api/users/:name', (request, response) => {
+  const isNameKnow = users.includes(request.params.name);
+  if (isNameKnow) {
+    response.send(request.params.name);
+  }
+  // if name is unknown, return 404 with "Name is unknown"
+  else {
+    // response.send('Name not found.');
+    response.status(404).send('Error 404 - Name not found in database');
+  }
 });
 
 app.get('/api/users', (_request, response) => {
-  const users = ['Homer', 'Lisa', 'Marge', 'Bart'];
   response.send(users);
 });
 
 app.get('/', (_req, res) => {
   res.send('Hello World 🐱‍👤!');
 });
-
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
