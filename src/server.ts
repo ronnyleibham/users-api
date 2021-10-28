@@ -3,7 +3,7 @@ dotenv.config();
 
 import express from 'express';
 import cookieParser from 'cookie-parser';
-import { connectDatabase } from './utils/database';
+import { connectDatabase, getUserCollection } from './utils/database';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('No MongDB found');
@@ -73,8 +73,11 @@ app.post('/api/login', (request, response) => {
   }
 });
 
-app.post('/api/users', (request, response) => {
+app.post('/api/users', async (request, response) => {
   const newUser = request.body;
+  const existingUser = await getUserCollection().findOne({
+    username: newUser.username,
+  });
   if (
     typeof newUser.name !== 'string' ||
     typeof newUser.username !== 'string' ||
@@ -84,11 +87,12 @@ app.post('/api/users', (request, response) => {
     return;
   }
 
-  if (users.some((user) => user.username === newUser.username)) {
+  if (existingUser) {
     response.status(409).send('User already exists');
   } else {
-    users.push(newUser);
-    response.send(`${newUser.name} added`);
+    const returnedObject = await getUserCollection().insertOne(newUser);
+    console.log(returnedObject.insertedId);
+    response.send(`${newUser.name} with ID ${returnedObject.insertedId} added`);
   }
 });
 
@@ -105,12 +109,15 @@ app.delete('/api/users/:username', (request, response) => {
   response.send('Deleted');
 });
 
-app.get('/api/users/:username', (request, response) => {
-  const user = users.find((user) => user.username === request.params.username);
-  if (user) {
-    response.send(user);
+app.get('/api/users/:username', async (request, response) => {
+  const newUser = request.params;
+  const existingUser = await getUserCollection().findOne({
+    username: newUser.username,
+  });
+  if (existingUser) {
+    response.send('User find');
   } else {
-    response.status(404).send('This page is not here. Check another Castle 🏰');
+    response.status(404).send('This user is not here. Check another Castle 🏰');
   }
 });
 

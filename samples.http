@@ -4,7 +4,7 @@ GET http://localhost:3000/api/users HTTP/1.1
 
 ### GET a single user
 
-GET http://localhost:3000/api/users/lmachens HTTP/1.1
+GET http://localhost:3000/api/users/LarrLaffer HTTP/1.1
 
 ### GET a single user which doesn't exist
 
@@ -18,9 +18,9 @@ POST http://localhost:3000/api/users HTTP/1.1
 Content-Type: application/json
 
 {
-    "name": "Bobby",
-    "username": "Bobson",
-    "password": "BobbyBobbtBob"
+    "name": "Peter",
+    "username": "PeterDerMeter",
+    "password": "Teil17"
 } 
 
 ### Login a user
