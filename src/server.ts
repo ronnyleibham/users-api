@@ -1,14 +1,23 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import { connectDatabase } from './utils/database';
+
+if (!process.env.MONGODB_URI) {
+  throw new Error('No MongDB found');
+}
 
 const app = express();
-// const port = 3000;
+const port = 3000;
 
 // Custom middleware to log requests
 app.use((request, _response, next) => {
   console.log('Request received', request.url);
   next();
 });
+
 // Middleware for parsing application/json
 app.use(express.json());
 
@@ -63,6 +72,7 @@ app.post('/api/login', (request, response) => {
     response.status(401).send('You shall not pass');
   }
 });
+
 app.post('/api/users', (request, response) => {
   const newUser = request.body;
   if (
@@ -73,6 +83,7 @@ app.post('/api/users', (request, response) => {
     response.status(400).send('Missing properties');
     return;
   }
+
   if (users.some((user) => user.username === newUser.username)) {
     response.status(409).send('User already exists');
   } else {
@@ -80,3 +91,39 @@ app.post('/api/users', (request, response) => {
     response.send(`${newUser.name} added`);
   }
 });
+
+app.delete('/api/users/:username', (request, response) => {
+  const usersIndex = users.findIndex(
+    (user) => user.username === request.params.username
+  );
+  if (usersIndex === -1) {
+    response.status(404).send("User doesn't exist. Check another Castle 🏰");
+    return;
+  }
+
+  users.splice(usersIndex, 1);
+  response.send('Deleted');
+});
+
+app.get('/api/users/:username', (request, response) => {
+  const user = users.find((user) => user.username === request.params.username);
+  if (user) {
+    response.send(user);
+  } else {
+    response.status(404).send('This page is not here. Check another Castle 🏰');
+  }
+});
+
+app.get('/api/users', (_request, response) => {
+  response.send(users);
+});
+
+app.get('/', (_req, res) => {
+  res.send('Hello World 🐱‍👤!');
+});
+
+connectDatabase(process.env.MONGODB_URI).then(() =>
+  app.listen(port, () => {
+    console.log(`Example app listening at http://localhost:${port}`);
+  })
+);
